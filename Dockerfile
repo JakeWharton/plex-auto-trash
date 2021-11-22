@@ -19,6 +19,7 @@ ENV \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     # Run every hour (at 12 minutes past) by default.
     CRON="12 * * * *" \
+    SCAN_IDLE="5" \
     HEALTHCHECK_ID="" \
     HEALTHCHECK_HOST="https://hc-ping.com"
 

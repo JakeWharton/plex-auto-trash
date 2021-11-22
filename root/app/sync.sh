@@ -7,7 +7,10 @@ fi
 # If the program fails we want to avoid triggering the health check.
 set -e
 
-/app/bin/plex-auto-trash --base-url "$PLEX_BASE_URL" --token "$PLEX_TOKEN"
+/app/bin/plex-auto-trash \
+	--base-url "$PLEX_BASE_URL" \
+	--token "$PLEX_TOKEN"\
+	--scan-idle "$SCAN_IDLE"
 
 if [ -n "$HEALTHCHECK_ID" ]; then
 	curl -sS -X POST -o /dev/null --fail "$HEALTHCHECK_HOST/$HEALTHCHECK_ID"

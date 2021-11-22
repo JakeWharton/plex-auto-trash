@@ -8,11 +8,14 @@ import com.github.ajalt.clikt.parameters.arguments.help
 import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.counted
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.options.validate
+import java.time.Duration
+import java.time.Instant
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -34,6 +37,11 @@ private class EmptyTrashCommand : CliktCommand(
 		.help("Plex authentication token. See: https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/")
 		.required()
 		.validate { it.isNotBlank() }
+
+	private val scanIdle by option(metavar = "MINUTES")
+		.help("Minimum amount of time (in minutes) since a library scan to empty its trash (default: 5)")
+		.convert{ Duration.ofMinutes(it.toLong()) }
+		.default(Duration.ofMinutes(5))
 
 	private val libraryExcludes by option("--exclude-library", metavar = "NAME")
 		.help("""
@@ -70,10 +78,11 @@ private class EmptyTrashCommand : CliktCommand(
 			.build()
 
 		val plexApi = HttpPlexApi(client, baseUrl, token)
+		val after = Instant.now() - scanIdle
 
 		try {
 			runBlocking {
-				emptyTrash(plexApi)
+				emptyTrash(plexApi, after)
 			}
 		} finally {
 			client.dispatcher.executorService.shutdown()
@@ -81,7 +90,7 @@ private class EmptyTrashCommand : CliktCommand(
 		}
 	}
 
-	private suspend fun emptyTrash(plexApi: PlexApi) {
+	private suspend fun emptyTrash(plexApi: PlexApi, after: Instant) {
 		val sections = plexApi.sections()
 		val sectionCount = sections.size
 		for ((index, section) in sections.withIndex()) {
@@ -93,8 +102,14 @@ private class EmptyTrashCommand : CliktCommand(
 			}
 
 			print("[${index + 1}/$sectionCount] Emptying trash: ${section.title}...")
-			plexApi.emptyTrash(section.key)
-			println(" Done")
+			if (section.refreshing) {
+				println(" Skipped due to sync")
+			} else if (section.lastScan > after) {
+				println(" Skipped due to recent sync")
+			} else {
+				plexApi.emptyTrash(section.key)
+				println(" Done")
+			}
 		}
 	}
 }
