@@ -79,7 +79,7 @@ A container which runs the binary is available from Docker Hub and GitHub Contai
 
 [hub]: https://hub.docker.com/r/jakewharton/plex-auto-trash/
 
-Start this container and point it at your qBittorrent instance with the `QBT_HOST` environment variable.
+Start this container and point it at your Plex server with the `PLEX_BASE_URL` and `PLEX_TOKEN` environment variables.
 
 ```
 $ docker run -d \
