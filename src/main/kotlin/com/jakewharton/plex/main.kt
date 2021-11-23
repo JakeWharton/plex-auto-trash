@@ -103,7 +103,7 @@ private class EmptyTrashCommand : CliktCommand(
 
 			print("[${index + 1}/$sectionCount] Emptying trash: ${section.title}...")
 			if (section.refreshing) {
-				println(" Skipped due to sync")
+				println(" Skipped due to in-progress sync")
 			} else if (section.lastScan > after) {
 				println(" Skipped due to recent sync")
 			} else {
