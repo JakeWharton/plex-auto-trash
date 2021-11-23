@@ -2,6 +2,11 @@
 
 Automatically empty the trash in all of your Plex libraries.
 
+If you disable [automatic trash emptying](https://support.plex.tv/articles/200289326-emptying-library-trash/) (and you probably should) trash still accumulates and must be emptied manually.
+This tool will automatically empty the trash of every library using two simple rules:
+- Do not empty trash if the library is currently scanning.
+- Do not empty trash until X minutes have passed since last scan (where X is configurable).
+
 Available as a standalone binary and Docker container.
 
 
@@ -35,13 +40,15 @@ Usage: plex-auto-trash [OPTIONS] [LIBRARY]...
   Empty the trash in all of your Plex libraries.
 
 Options:
-  --base-url URL            Base URL of Plex server web interface (e.g.,
-                            http://plex:32400/)
-  --token TOKEN             Plex authentication token. See:
-                            https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
-  --exclude-library NAME    Name of libraries to exclude. Mutually exclusive
-                            with LIBRARY arguments.
-  -h, --help                Show this message and exit
+  --base-url URL          Base URL of Plex server web interface (e.g.,
+                          http://plex:32400/)
+  --token TOKEN           Plex authentication token. See:
+                          https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/
+  --scan-idle MINUTES     Minimum amount of time (in minutes) since a library
+                          scan to empty its trash (default: 5)
+  --exclude-library NAME  Name of libraries to exclude. Mutually exclusive
+                          with LIBRARY arguments.
+  -h, --help              Show this message and exit
 
 Arguments:
   LIBRARY  Name of libraries to scan. All libraries will be scanned if none
@@ -56,8 +63,8 @@ not indexed by Plex will be output, and the command will have an exit code of 1.
 
 ```
 $ plex-auto-trash --base-url http://plexms:32400/ --token MY_TOKEN
-Emptying trash: Movies... Done
-Emptying trash: TV... Done
+[1/2] Emptying trash: Movies... Done
+[2/2] Emptying trash: TV... Done
 ```
 
 ### Docker
@@ -93,11 +100,15 @@ services:
       - "PLEX_TOKEN=abcdef123456"
 ```
 
-The container will check all of your torrents every hour by default.
+The container will empty trash at 12 minutes past the hour, every hour by default.
+This should hopefully avoid collision with other tools and scheduled library scans.
 To change when it runs, specify the `CRON` environment variable with a valid cron specifier.
 For help creating a valid cron specifier, visit [cron.help][cron].
 
 [cron]: https://cron.help/#0_*_*_*_*
+
+The default minimum time since last scan (called "idle time") is 5 minutes.
+Specify an integer value in the `SCAN_IDLE` environment variable to change this value.
 
 To be notified when sync is failing visit https://healthchecks.io, create a check, and specify
 the ID to the container using the `HEALTHCHECK_ID` environment variable.
