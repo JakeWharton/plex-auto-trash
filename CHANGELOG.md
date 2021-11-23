@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.0]
 
- - Initial release
+Initial release.
 
 
 [Unreleased]: https://github.com/JakeWharton/plex-auto-trash/compare/1.0.0...HEAD
