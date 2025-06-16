@@ -13,7 +13,9 @@ apply plugin: 'org.jetbrains.kotlin.jvm'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 apply plugin: 'application'
-mainClassName = 'com.jakewharton.plex.Main'
+application {
+  mainClass = 'com.jakewharton.plex.Main'
+}
 
 dependencies {
 	implementation libs.clikt
