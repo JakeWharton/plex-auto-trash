@@ -3,6 +3,8 @@
 package com.jakewharton.plex
 
 import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.Context
+import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.arguments.argument
 import com.github.ajalt.clikt.parameters.arguments.help
 import com.github.ajalt.clikt.parameters.arguments.multiple
@@ -24,10 +26,9 @@ import okhttp3.logging.HttpLoggingInterceptor.Level.BASIC
 import okhttp3.logging.HttpLoggingInterceptor.Level.BODY
 import okhttp3.logging.HttpLoggingInterceptor.Level.NONE
 
-private class EmptyTrashCommand : CliktCommand(
-	name = "plex-auto-trash",
-	help = "Empty the trash in all of your Plex libraries.",
-) {
+private class EmptyTrashCommand : CliktCommand("plex-auto-trash") {
+	override fun help(context: Context) = "Empty the trash in all of your Plex libraries."
+
 	private val baseUrl by option(metavar = "URL")
 		.help("Base URL of Plex server web interface (e.g., http://plex:32400/)")
 		.convert { it.toHttpUrl() }
