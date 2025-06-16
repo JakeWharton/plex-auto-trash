@@ -11,7 +11,7 @@ COPY src ./src
 RUN ./gradlew build
 
 
-FROM project42/s6-alpine:3.14
+FROM project42/s6-alpine:3.19
 LABEL maintainer="Jake Wharton <docker@jakewharton.com>"
 ENTRYPOINT ["/init"]
 ENV \
