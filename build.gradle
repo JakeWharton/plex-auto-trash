@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+
 buildscript {
 	repositories {
 		mavenCentral()
@@ -37,15 +40,20 @@ tasks.named("distTar").configure { task ->
 	task.enabled = false
 }
 tasks.named("assemble").configure { task ->
-	task.dependsOn(tasks.getByName("installDist"))
+	task.dependsOn(tasks.named("installDist"))
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile).configureEach { task ->
-	task.kotlinOptions {
-		jvmTarget = '1.8'
-		freeCompilerArgs += [
-				'-progressive',
-				'-Xopt-in=kotlin.ExperimentalStdlibApi',
-		]
+tasks.withType(KotlinJvmCompile).configureEach { task ->
+	task.compilerOptions {
+		jvmTarget = JvmTarget.JVM_1_8
+		freeCompilerArgs.addAll([
+			'-progressive',
+			'-Xopt-in=kotlin.ExperimentalStdlibApi',
+		])
 	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+	targetCompatibility = JavaVersion.VERSION_1_8.toString()
 }
