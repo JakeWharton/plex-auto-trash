@@ -11,7 +11,7 @@ COPY src ./src
 RUN ./gradlew build
 
 
-FROM crazymax/alpine-s6:3.19
+FROM crazymax/alpine-s6:3.22
 LABEL maintainer="Jake Wharton <docker@jakewharton.com>"
 ENTRYPOINT ["/init"]
 ENV \
