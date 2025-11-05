@@ -35,10 +35,11 @@ jobs:
           images: |
             jakewharton/plex-auto-trash
             ghcr.io/jakewharton/plex-auto-trash
-          tag-semver: |
-            {{version}}
-            {{major}}
-            {{major}}.{{minor}}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - uses: docker/login-action@v3
         with:
