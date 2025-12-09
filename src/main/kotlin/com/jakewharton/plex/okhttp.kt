@@ -16,7 +16,7 @@ suspend fun Call.awaitString(): String {
 			override fun onResponse(call: Call, response: Response) {
 				response.use {
 					if (response.isSuccessful) {
-						val body = response.body!!.string()
+						val body = response.body.string()
 						continuation.resume(body)
 					} else {
 						continuation.resumeWithException(

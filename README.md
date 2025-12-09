@@ -72,47 +72,53 @@ $ plex-auto-trash --base-url http://plexms:32400/ --token MY_TOKEN
 A container which runs the binary is available from Docker Hub and GitHub Container Registry.
 
 * `jakewharton/plex-auto-trash`
-	[![Docker Image Version](https://img.shields.io/docker/v/jakewharton/plex-auto-trash?sort=semver)][hub]
-	[![Docker Image Size](https://img.shields.io/docker/image-size/jakewharton/plex-auto-trash)][hub]
-
 * `ghcr.io/jakewharton/plex-auto-trash`
+
+[![Docker Image Version](https://img.shields.io/docker/v/jakewharton/plex-auto-trash?sort=semver&style=flat-square)][hub]
+[![Docker Image Size](https://img.shields.io/docker/image-size/jakewharton/plex-auto-trash?sort=semver&style=flat-square)][hub]<br>
+[![Docker Image Version](https://img.shields.io/docker/v/jakewharton/plex-auto-trash/trunk?style=flat-square)][hub]
+[![Docker Image Size](https://img.shields.io/docker/image-size/jakewharton/plex-auto-trash/trunk?style=flat-square)][hub]
 
 [hub]: https://hub.docker.com/r/jakewharton/plex-auto-trash/
 
-Start this container and point it at your Plex server with the `PLEX_BASE_URL` and `PLEX_TOKEN` environment variables.
+By default, the tool will run a single time and then exit.
 
 ```
-$ docker run -d \
-    -e "PLEX_BASE_URL=http://plexms:32400" \
-    -e "PLEX_TOKEN=abcdef123456" \
-    jakewharton/plex-auto-trash:1
+$ docker run \
+    jakewharton/plex-auto-trash \
+      --token abc123 \
+      --base-url https://radarr.example.com
 ```
 
-For Docker Compose, add it as an additional service:
+See [command-line usage](#command-line) for how to run the binary.
+
+If you specify the `--cron` option with a valid cron specifier, the tool will not exit and perform automatic checks in accordance with the schedule.
+For help creating a valid cron specifier, visit [cron.help](https://cron.help/#0_*_*_*_*).
+
+To be notified when sync is failing visit https://healthchecks.io, create a check, and specify the ID to the container using the `--hc-id` option.
+You can also specify a custom host with `--hc-host`.
+
+If you're using Docker Compose, all the options are available as environment variables.
+
 ```yaml
 services:
   plex-auto-trash:
     container_name: plex-auto-trash
-    image: jakewharton/plex-auto-trash:1
+    image: jakewharton/plex-auto-trash:latest
     restart: unless-stopped
-    environment:
-      - "PLEX_BASE_URL=http://plexms:32400"
-      - "PLEX_TOKEN=abcdef123456"
+		environment:
+			- "PLEX_AUTO_TRASH_TOKEN=abc123xyz"
+			- "PLEX_AUTO_TRASH_BASE_URL=http://plexms:32400"
+			- "PLEX_AUTO_TRASH_CRON=0 * * * *"
+			#Optional:
+			- "PLEX_AUTO_TRASH_IDLE_MINUTES=5"
+			- "PLEX_AUTO_TRASH_HC_ID=..."
+			- "PLEX_AUTO_TRASH_HC_HOST=..."
 ```
 
-The container will empty trash at 12 minutes past the hour, every hour by default.
-This should hopefully avoid collision with other tools and scheduled library scans.
-To change when it runs, specify the `CRON` environment variable with a valid cron specifier.
-For help creating a valid cron specifier, visit [cron.help][cron].
-
-[cron]: https://cron.help/#0_*_*_*_*
-
-The default minimum time since last scan (called "idle time") is 5 minutes.
-Specify an integer value in the `SCAN_IDLE` environment variable to change this value.
-
-To be notified when sync is failing visit https://healthchecks.io, create a check, and specify
-the ID to the container using the `HEALTHCHECK_ID` environment variable.
-
+Note: You may want to specify an explicit version rather than `latest`.
+See https://hub.docker.com/r/jakewharton/plex-auto-trash/tags or `CHANGELOG.md` for the available versions.
+Use `trunk` for the latest changes.
 
 ## Development
 
