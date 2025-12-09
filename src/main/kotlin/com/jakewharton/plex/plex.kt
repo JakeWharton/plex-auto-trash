@@ -1,6 +1,6 @@
 package com.jakewharton.plex
 
-import java.time.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -44,7 +44,7 @@ class HttpPlexApi(
 		val sectionsResponse =
 			json.decodeFromString(PlexResponse.serializer(PlexSections.serializer()), sectionsJson)
 		return sectionsResponse.mediaContainer.sections.map {
-			PlexSection(it.key, it.title, it.refreshing, Instant.ofEpochSecond(it.scannedAt))
+			PlexSection(it.key, it.title, it.refreshing, Instant.fromEpochSeconds(it.scannedAt))
 		}
 	}
 

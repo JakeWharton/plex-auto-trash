@@ -22,6 +22,7 @@ application {
 
 dependencies {
 	implementation libs.clikt
+	implementation libs.cardiologist
 
 	implementation libs.kotlinx.coroutines.core
 
@@ -46,10 +47,12 @@ tasks.named("assemble").configure { task ->
 tasks.withType(KotlinJvmCompile).configureEach { task ->
 	task.compilerOptions {
 		jvmTarget = JvmTarget.JVM_1_8
-		freeCompilerArgs.addAll([
+		optIn.addAll(
+			"kotlin.time.ExperimentalTime",
+		)
+		freeCompilerArgs.addAll(
 			'-progressive',
-			'-Xopt-in=kotlin.ExperimentalStdlibApi',
-		])
+		)
 	}
 }
 

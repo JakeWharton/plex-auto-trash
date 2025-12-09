@@ -1,35 +1,34 @@
-FROM azul/zulu-openjdk-alpine:25-latest AS build
-ENV GRADLE_OPTS="-Dorg.gradle.daemon=false -Dkotlin.incremental=false"
-WORKDIR /app
-
-COPY gradlew settings.gradle ./
-COPY gradle ./gradle
-RUN ./gradlew --version
-
-COPY build.gradle ./
-COPY src ./src
-RUN ./gradlew build
-
-
-FROM crazymax/alpine-s6:3.22
-LABEL maintainer="Jake Wharton <docker@jakewharton.com>"
-ENTRYPOINT ["/init"]
-ENV \
-    # Fail if cont-init scripts exit with non-zero code.
-    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
-    # Run every hour (at 12 minutes past) by default.
-    CRON="12 * * * *" \
-    SCAN_IDLE="5" \
-    HEALTHCHECK_ID="" \
-    HEALTHCHECK_HOST="https://hc-ping.com"
+FROM alpine:3.23.0 AS build
+ENV GRADLE_OPTS="-Dkotlin.incremental=false -Dorg.gradle.daemon=false -Dorg.gradle.vfs.watch=false -Dorg.gradle.logging.stacktrace=full"
 
 RUN apk add --no-cache \
-      curl \
-      openjdk8-jre \
+      openjdk21 \
  && rm -rf /var/cache/* \
  && mkdir /var/cache/apk
 
-COPY root/ /
+WORKDIR /app
+
+# Get the Gradle wrapper and cache the Gradle distribution first.
+COPY gradlew settings.gradle ./
+COPY gradle/wrapper ./gradle/wrapper
+RUN ./gradlew --version
+
+COPY gradle/libs.versions.toml ./gradle/libs.versions.toml
+COPY build.gradle ./
+COPY src/main ./src/main
+RUN ./gradlew installDist
+
+
+FROM alpine:3.23.0
+LABEL maintainer="Jake Wharton <docker@jakewharton.com>"
+
+RUN apk add --no-cache \
+      openjdk8-jre-base \
+      tini \
+ && rm -rf /var/cache/* \
+ && mkdir /var/cache/apk
 
 WORKDIR /app
 COPY --from=build /app/build/install/plex-auto-trash ./
+
+ENTRYPOINT ["/sbin/tini", "--", "/app/bin/plex-auto-trash"]
